@@ -9,7 +9,7 @@
 
 <br>
 
-<img src="image_b2f436.jpg" alt="Zann AI App Preview" width="100%" style="border-radius: 15px; box-shadow: 0px 4px 15px rgba(0,0,0,0.5);">
+<img width="704" height="1195" alt="image" src="https://github.com/user-attachments/assets/d672e061-1914-4454-b3b6-c725f7069980" />
 
 <br>
 
