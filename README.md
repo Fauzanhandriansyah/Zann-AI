@@ -3,7 +3,7 @@
 # Zann AI
 **Asisten AI Pembelajaran & Produktivitas Cerdas Masa Depan**
 
-[![Version](https://img.shields.io/badge/Version-3.0-blue.svg?style=for-the-badge)](https://github.com/username/zann-ai)
+[![Version](https://img.shields.io/badge/Version-3.0-blue.svg?style=for-the-badge)](https://github.com/Fauzanhandriansyah/zann-ai)
 [![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-lightgrey.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
@@ -75,9 +75,6 @@ Ikuti langkah-langkah di bawah ini untuk menjalankan Zann AI di lingkungan lokal
    ```bash
    git clone [https://github.com/Fauzanhandriansyah/zann-ai.git](https://github.com/Fauzanhandriansyah/zann-ai.git)
 ## Run Locally
-
-**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
-
 
 1. Open Android Studio
 2. Select **Open** and choose the directory containing this project
