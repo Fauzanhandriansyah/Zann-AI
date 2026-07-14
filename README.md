@@ -3,8 +3,8 @@
 # Zann AI
 **Asisten AI Pembelajaran & Produktivitas Cerdas Masa Depan**
 
-[![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
 [![Version](https://img.shields.io/badge/Version-3.0-blue.svg?style=for-the-badge)](https://github.com/username/zann-ai)
+[![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-lightgrey.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
 
