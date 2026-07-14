@@ -4,6 +4,7 @@
 **Asisten AI Pembelajaran & Produktivitas Cerdas Masa Depan**
 
 [![Version](https://img.shields.io/badge/Version-3.0-blue.svg?style=for-the-badge)](https://github.com/username/zann-ai)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-lightgrey.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 <br>
