@@ -61,7 +61,6 @@ fun FlashcardScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    // Initialize TTS
     val tts = remember {
         var ttsInstance: TextToSpeech? = null
         ttsInstance = TextToSpeech(context) { status ->
@@ -85,7 +84,6 @@ fun FlashcardScreen(
         }
     }
 
-    // ViewModel Flows
     val allDecks by viewModel.allDecks.collectAsState()
     val inputText by viewModel.inputText.collectAsState()
     val deckTitleInput by viewModel.deckTitleInput.collectAsState()
@@ -94,7 +92,6 @@ fun FlashcardScreen(
     val isGenerating by viewModel.isGenerating.collectAsState()
     val generateError by viewModel.generateError.collectAsState()
 
-    // Persistent new states for Feature 1, 2, 5
     val starredCardIds by viewModel.starredCardIds.collectAsState()
     val onlyStudyStarred by viewModel.onlyStudyStarred.collectAsState()
     val studyHistory by viewModel.studyHistory.collectAsState()
@@ -104,7 +101,6 @@ fun FlashcardScreen(
 
     var showFullEditDialog by remember { mutableStateOf(false) }
 
-    // Selection/Active states
     val activeDeck by viewModel.activeDeck.collectAsState()
     val activeCards by viewModel.activeCards.collectAsState()
     val currentCardIndex by viewModel.currentCardIndex.collectAsState()
@@ -112,16 +108,14 @@ fun FlashcardScreen(
     val cardStatuses by viewModel.cardStatuses.collectAsState()
     val isStudySessionFinished by viewModel.isStudySessionFinished.collectAsState()
 
-    // Image upload states
     val attachedFileName by viewModel.attachedFileName.collectAsState()
     val attachedFileMimeType by viewModel.attachedFileMimeType.collectAsState()
     val attachedFileBase64 by viewModel.attachedFileBase64.collectAsState()
 
-    var activeTab by remember { mutableStateOf(0) } // 0: Buat Baru, 1: Koleksi Dek
+    var activeTab by remember { mutableStateOf(0) } 
 
-    // Feature 1: Dynamic Search Query and Type Filtering
     var searchQuery by remember { mutableStateOf("") }
-    var selectedTypeFilter by remember { mutableStateOf("Semua") } // "Semua", "biasa", "pilihan_ganda"
+    var selectedTypeFilter by remember { mutableStateOf("Semua") } 
 
     val filteredDecks = remember(allDecks, searchQuery, selectedTypeFilter) {
         allDecks.filter { deck ->
@@ -132,7 +126,6 @@ fun FlashcardScreen(
         }
     }
 
-    // Photo/Image pickers
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
@@ -215,7 +208,6 @@ fun FlashcardScreen(
                 label = "ActiveViewTransition"
             ) { targetSelection ->
                 if (targetSelection != null) {
-                    // Study Mode View
                     StudySessionView(
                         deck = targetSelection,
                         cards = activeCards,
@@ -235,11 +227,9 @@ fun FlashcardScreen(
                         onSpeak = speakOut
                     )
                 } else {
-                    // Maker & Gallery View
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        // Adaptive Streaks and Daily Goal Dashboard
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -260,7 +250,6 @@ fun FlashcardScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // Streak text & Fire Badge
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(
                                             imageVector = Icons.Default.Whatshot,
@@ -277,7 +266,6 @@ fun FlashcardScreen(
                                         )
                                     }
 
-                                    // Daily Goal Progress Fraction
                                     Text(
                                         text = "$dailyReviewedCards / $dailyGoal Kartu Hari Ini",
                                         fontSize = 11.sp,
@@ -288,7 +276,6 @@ fun FlashcardScreen(
 
                                 Spacer(modifier = Modifier.height(10.dp))
 
-                                // Progress Bar
                                 val progressFraction = if (dailyGoal > 0) (dailyReviewedCards.toFloat() / dailyGoal).coerceIn(0f, 1f) else 0f
                                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                     LinearProgressIndicator(
@@ -313,7 +300,6 @@ fun FlashcardScreen(
                                             color = if (progressFraction >= 1f) Color(0xFF388E3C) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                         )
                                         
-                                        // Edit Goal label/button
                                         var showGoalDialog by remember { mutableStateOf(false) }
                                         Text(
                                             text = "Ubah Target",
@@ -365,7 +351,6 @@ fun FlashcardScreen(
                             }
                         }
 
-                        // Dynamic Tab indicators
                         TabRow(
                             selectedTabIndex = activeTab,
                             containerColor = MaterialTheme.colorScheme.surface,
@@ -443,7 +428,6 @@ fun FlashcardScreen(
                         }
 
                         if (activeTab == 0) {
-                            // Workspace for generating new Decks
                             FlashcardGeneratorWorkspace(
                                 inputText = inputText,
                                 deckTitleInput = deckTitleInput,
@@ -472,7 +456,6 @@ fun FlashcardScreen(
                                 onDismissError = { viewModel.clearError() }
                             )
                         } else {
-                            // Gallery lists with Feature 1 (Search, Type Filter), Feature 2 (Study Starered Option), and Feature 5 (Study History) built-in
                             FlashcardGallery(
                                 decks = filteredDecks,
                                 searchQuery = searchQuery,
@@ -529,7 +512,6 @@ fun FlashcardGeneratorWorkspace(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Welcoming card
         Card(
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(
@@ -564,7 +546,6 @@ fun FlashcardGeneratorWorkspace(
             }
         }
 
-        // Title textfield
         OutlinedTextField(
             value = deckTitleInput,
             onValueChange = onTitleChange,
@@ -578,7 +559,6 @@ fun FlashcardGeneratorWorkspace(
             shape = RoundedCornerShape(10.dp)
         )
 
-        // Text input area
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
