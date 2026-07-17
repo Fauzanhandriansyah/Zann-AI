@@ -38,7 +38,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Zann AI Home Screen Interactive Widget -->
         <receiver
             android:name=".ZannWidgetProvider"
             android:exported="true"
