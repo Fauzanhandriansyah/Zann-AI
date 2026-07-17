@@ -26,7 +26,6 @@ class ZannWidgetProvider : AppWidgetProvider() {
     ) {
         val views = RemoteViews(context.packageName, R.layout.zann_widget_layout)
 
-        // Helper to construct a PendingIntent to open MainActivity with specific extra parameter
         fun createPendingIntent(actionValue: String): PendingIntent {
             val intent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -40,7 +39,6 @@ class ZannWidgetProvider : AppWidgetProvider() {
             )
         }
 
-        // Set pending intents for header and grid buttons
         views.setOnClickPendingIntent(R.id.widget_header_pill, createPendingIntent("main"))
         views.setOnClickPendingIntent(R.id.widget_button_mic, createPendingIntent("voice"))
         views.setOnClickPendingIntent(R.id.widget_button_camera, createPendingIntent("camera"))
@@ -48,7 +46,6 @@ class ZannWidgetProvider : AppWidgetProvider() {
         views.setOnClickPendingIntent(R.id.widget_button_gallery, createPendingIntent("gallery"))
         views.setOnClickPendingIntent(R.id.widget_button_live, createPendingIntent("live"))
 
-        // Update the widget layout
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 }
