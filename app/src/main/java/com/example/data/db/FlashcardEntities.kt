@@ -10,7 +10,7 @@ data class FlashcardDeck(
     val description: String,
     val sourceMaterial: String,
     val timestamp: Long = System.currentTimeMillis(),
-    val deckType: String = "biasa" // "biasa" or "pilihan_ganda"
+    val deckType: String = "biasa" 
 )
 
 @Entity(tableName = "flashcards")
@@ -20,7 +20,7 @@ data class Flashcard(
     val question: String,
     val answer: String,
     val explanation: String? = null,
-    val difficulty: String = "Belum Diuji", // "Belum Diuji", "Paham", "Perlu Belajar"
+    val difficulty: String = "Belum Diuji", 
     val timestamp: Long = System.currentTimeMillis()
 )
 
