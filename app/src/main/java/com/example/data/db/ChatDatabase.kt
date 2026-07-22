@@ -22,7 +22,7 @@ data class ChatSession(
 data class ChatMessage(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val sessionId: String,
-    val sender: String, // "user" or "model"
+    val sender: String, 
     val text: String,
     val timestamp: Long = System.currentTimeMillis(),
     val fileBase64: String? = null,
@@ -35,7 +35,7 @@ data class ChatMessage(
 data class LearnedKnowledge(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val sourceSessionId: String,
-    val type: String, // e.g. "Koreksi", "Pengetahuan", "Preferensi", "Gaya Bahasa"
+    val type: String, 
     val content: String,
     val timestamp: Long = System.currentTimeMillis()
 )
