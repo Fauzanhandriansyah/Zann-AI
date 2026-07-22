@@ -68,7 +68,7 @@ class FlashcardRepository(private val flashcardDao: FlashcardDao) {
     ): List<Flashcard> = withContext(Dispatchers.IO) {
         val apiKey = BuildConfig.GEMINI_API_KEY
         if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
-            throw Exception("API Key Gemini belum dikonfigurasi di panel Secrets AI Studio.")
+            throw Exception("API Key Gemini belum dikonfigurasi.")
         }
 
         val promptText = """
@@ -140,7 +140,6 @@ class FlashcardRepository(private val flashcardDao: FlashcardDao) {
             throw Exception("Gagal terhubung dengan Gemini API untuk menghasilkan flashcard. Kendala terakhir: ${lastErr?.localizedMessage ?: "Respon kosong."}")
         }
 
-        // Clean JSON formatting robustly by extracting the JSON Array block
         val startArray = responseText.indexOf('[')
         val endArray = responseText.lastIndexOf(']')
         var cleanedText = if (startArray != -1 && endArray != -1 && endArray > startArray) {
