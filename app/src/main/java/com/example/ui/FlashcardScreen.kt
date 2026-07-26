@@ -647,7 +647,6 @@ fun FlashcardGeneratorWorkspace(
             }
         }
 
-        // Attachment Section (Responsive visual upload desk)
         Card(
             shape = RoundedCornerShape(12.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
@@ -789,7 +788,6 @@ fun FlashcardGeneratorWorkspace(
             }
         }
 
-        // Selected Flashcard Type Selector (Classic card vs Interactive Multiple Choice quiz)
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 text = "Jenis Flashcard Kuis:",
@@ -802,7 +800,6 @@ fun FlashcardGeneratorWorkspace(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Option 1: Classic Card Flipping
                 Card(
                     modifier = Modifier
                         .weight(1f)
@@ -842,7 +839,6 @@ fun FlashcardGeneratorWorkspace(
                     }
                 }
 
-                // Option 2: Multiple Choice Quiz
                 Card(
                     modifier = Modifier
                         .weight(1f)
@@ -884,7 +880,6 @@ fun FlashcardGeneratorWorkspace(
             }
         }
 
-        // Card Count Customizer (Slider)
         Card(
             shape = RoundedCornerShape(12.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)),
@@ -939,7 +934,6 @@ fun FlashcardGeneratorWorkspace(
             )
         }
 
-        // Action Trigger
         Button(
             onClick = onGenerateAction,
             enabled = !isGenerating,
@@ -1034,7 +1028,6 @@ fun FlashcardGallery(
     val context = LocalContext.current
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Control Row: Search Bar
         OutlinedTextField(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
@@ -1054,7 +1047,6 @@ fun FlashcardGallery(
             singleLine = true
         )
 
-        // Filtration Badges
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1080,7 +1072,6 @@ fun FlashcardGallery(
             )
         }
 
-        // Feature 2 & 5 Row Buttons: Study Starred Toggle & History Viewer
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1088,7 +1079,6 @@ fun FlashcardGallery(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Heart Star Button
             Surface(
                 onClick = onToggleOnlyStudyStarred,
                 shape = RoundedCornerShape(10.dp),
@@ -1119,7 +1109,6 @@ fun FlashcardGallery(
                 }
             }
 
-            // View Study History Logs button
             Surface(
                 onClick = { showHistoryDialog = true },
                 shape = RoundedCornerShape(10.dp),
@@ -1309,7 +1298,6 @@ fun FlashcardGallery(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
-                                // Toggle Deck Type Button
                                 IconButton(
                                     onClick = {
                                         onToggleDeckType(deck)
@@ -1324,7 +1312,6 @@ fun FlashcardGallery(
                                     )
                                 }
 
-                                // Reset Study Progress Button
                                 IconButton(
                                     onClick = { showResetConfirm = true }
                                 ) {
@@ -1335,7 +1322,6 @@ fun FlashcardGallery(
                                     )
                                 }
 
-                                // Delete Deck Button
                                 IconButton(
                                     onClick = { showDeleteConfirm = true }
                                 ) {
@@ -1404,7 +1390,6 @@ fun FlashcardGallery(
         }
     }
 
-    // Historical score stats dialog popup
     if (showHistoryDialog) {
         AlertDialog(
             onDismissRequest = { showHistoryDialog = false },
@@ -1493,7 +1478,6 @@ fun FlashcardGallery(
                                             )
                                         }
 
-                                        // Badge Score representation
                                         val badgeColor = when {
                                             log.scorePercent >= 85 -> Color(0xFF1B5E20)
                                             log.scorePercent >= 60 -> Color(0xFFE65100)
@@ -1563,10 +1547,8 @@ fun StudySessionView(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    // Feature 2: Support shuffling/randomizing cards locally inside study session
     var shuffledCards by remember(cards) { mutableStateOf(cards) }
 
-    // Feature 4: Active study session elapsed stopwatch timer
     var sessionElapsedTime by remember { mutableStateOf(0) }
     LaunchedEffect(isFinished) {
         if (!isFinished) {
@@ -1593,12 +1575,10 @@ fun StudySessionView(
     }
 
     if (isFinished) {
-        // Study Completed Summary Card
         val pahamCount = cardStatuses.values.count { it == "Paham" }
         val perluCount = cardStatuses.values.count { it == "Perlu Belajar" }
         val scorePercent = ((pahamCount.toFloat() / shuffledCards.size.toFloat()) * 100).toInt()
 
-        // Feature 5: Save completing session to database/preferences histories
         LaunchedEffect(isFinished) {
             onSaveSessionHistory(scorePercent)
         }
@@ -1635,7 +1615,6 @@ fun StudySessionView(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Score Dashboard representation
             Card(
                 modifier = Modifier.widthIn(max = 400.dp),
                 shape = RoundedCornerShape(16.dp),
@@ -1710,7 +1689,6 @@ fun StudySessionView(
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f))
 
-                    // Helpful Advice description
                     val adviceText = if (scorePercent >= 80) {
                         "Luar biasa! Pemahaman Anda sangat tinggi untuk materi ini. Siap untuk menerjang ujian langsung!"
                     } else if (scorePercent >= 50) {
@@ -1760,7 +1738,6 @@ fun StudySessionView(
 
     val currentCard = shuffledCards[currentIndex]
 
-    // States for Multiple Choice Quiz
     var chosenMcOption by remember(currentCard.id) { mutableStateOf<String?>(null) }
     var mcSubmitted by remember(currentCard.id) { mutableStateOf(false) }
 
@@ -1790,7 +1767,6 @@ fun StudySessionView(
         distractors.shuffled()
     }
 
-    // States for active card operations: Delete
     var showCardDeleteDialog by remember { mutableStateOf(false) }
 
     Column(
@@ -1800,7 +1776,6 @@ fun StudySessionView(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // Top statistics header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -1820,7 +1795,6 @@ fun StudySessionView(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Feature 4: Stopwatch elapsed timer badge in green-themed wrapper
                 Box(
                     modifier = Modifier
                         .background(
@@ -1868,13 +1842,11 @@ fun StudySessionView(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Actions Bar: Shuffling & Star Toggling Options (Feature 2, Feature 3)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Shuffle Action Button
             TextButton(
                 onClick = {
                     shuffledCards = shuffledCards.shuffled()
@@ -1901,7 +1873,6 @@ fun StudySessionView(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // Interactive Delete Card Actions
                 IconButton(
                     onClick = { showCardDeleteDialog = true },
                     modifier = Modifier.size(36.dp).testTag("delete_card_button")
