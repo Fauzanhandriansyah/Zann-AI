@@ -7,7 +7,6 @@
     android:orientation="vertical"
     android:padding="12dp">
 
-    <!-- Top Pill Header (Zann AI + Voice input) -->
     <LinearLayout
         android:id="@+id/widget_header_pill"
         android:layout_width="match_parent"
@@ -49,14 +48,12 @@
 
     </LinearLayout>
 
-    <!-- 2x2 Grid shortcuts -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <!-- Row 1: Camera & File -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -64,7 +61,6 @@
             android:layout_marginBottom="6dp"
             android:orientation="horizontal">
 
-            <!-- Camera Button -->
             <LinearLayout
                 android:id="@+id/widget_button_camera"
                 android:layout_width="0dp"
@@ -95,7 +91,6 @@
 
             </LinearLayout>
 
-            <!-- File Button -->
             <LinearLayout
                 android:id="@+id/widget_button_file"
                 android:layout_width="0dp"
@@ -128,14 +123,12 @@
 
         </LinearLayout>
 
-        <!-- Row 2: Gallery & Live -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <!-- Gallery Button -->
             <LinearLayout
                 android:id="@+id/widget_button_gallery"
                 android:layout_width="0dp"
@@ -166,7 +159,6 @@
 
             </LinearLayout>
 
-            <!-- Live Button -->
             <LinearLayout
                 android:id="@+id/widget_button_live"
                 android:layout_width="0dp"
