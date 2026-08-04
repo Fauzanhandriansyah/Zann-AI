@@ -186,6 +186,41 @@ private val MintLightColorScheme = lightColorScheme(
     onSurfaceVariant = Color(0xFF465D69)
 )
 
+// 6. System Slate / Dark Gray (System Dark Gray Minimalist)
+private val SystemSlateDarkColorScheme = darkColorScheme(
+    primary = SystemSlateSecondary,
+    secondary = SystemSlatePrimary,
+    tertiary = SystemSlateTertiary,
+    background = SystemSlateDarkBg,
+    surface = SystemSlateDarkBg,
+    surfaceContainer = SystemSlateDarkCard,
+    surfaceContainerHigh = SystemSlateDarkCard,
+    surfaceContainerLowest = SystemSlateDarkBg,
+    onPrimary = Color(0xFF121212),
+    onSecondary = Color(0xFF121212),
+    onBackground = Color(0xFFE0E0E0),
+    onSurface = Color(0xFFE0E0E0),
+    surfaceVariant = SystemSlateDarkCard,
+    onSurfaceVariant = Color(0xFFA0A0A0)
+)
+
+private val SystemSlateLightColorScheme = lightColorScheme(
+    primary = Color(0xFF455A64),
+    secondary = SystemSlatePrimary,
+    tertiary = SystemSlateTertiary,
+    background = SystemSlateLightBg,
+    surface = Color.White,
+    surfaceContainer = SystemSlateLightCard,
+    surfaceContainerHigh = SystemSlateLightCard,
+    surfaceContainerLowest = Color.White,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onBackground = Color(0xFF212121),
+    onSurface = Color(0xFF212121),
+    surfaceVariant = SystemSlateLightCard,
+    onSurfaceVariant = Color(0xFF616161)
+)
+
 @Composable
 fun MyApplicationTheme(
     appThemeId: String = "cyber_fusion",
@@ -201,6 +236,7 @@ fun MyApplicationTheme(
         else -> {
             if (darkTheme) {
                 when (appThemeId) {
+                    "system_slate" -> SystemSlateDarkColorScheme
                     "sunset_horizon" -> SunsetDarkColorScheme
                     "forest_moss" -> ForestDarkColorScheme
                     "cosmic_nebula" -> CosmicDarkColorScheme
@@ -209,6 +245,7 @@ fun MyApplicationTheme(
                 }
             } else {
                 when (appThemeId) {
+                    "system_slate" -> SystemSlateLightColorScheme
                     "sunset_horizon" -> SunsetLightColorScheme
                     "forest_moss" -> ForestLightColorScheme
                     "cosmic_nebula" -> CosmicLightColorScheme

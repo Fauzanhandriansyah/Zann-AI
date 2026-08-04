@@ -65,13 +65,16 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
     ): String {
         val apiKey = BuildConfig.GEMINI_API_KEY
         if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
-            return "Zann AI Error: API Key Gemini belum dikonfigurasi. Silakan konfigurasi kunci Anda dengan nama GEMINI_API_KEY."
+            return "Zann AI Error: API Key Gemini belum dikonfigurasi di panel Secrets AI Studio. Silakan konfigurasi kunci Anda dengan nama GEMINI_API_KEY."
         }
 
+        // Map database history into Gemini Contents API format (using "user" and "model")
+        // To guarantee alternating roles, consecutive identical roles are merged into a single Content turn.
         val formattedContents = mutableListOf<Content>()
         history.forEach { msg ->
             val role = if (msg.sender == "user") "user" else "model"
             if (formattedContents.isNotEmpty() && formattedContents.last().role == role) {
+                // Merge parts if the role matches the previous turn
                 val updatedParts = formattedContents.last().parts.toMutableList()
                 updatedParts.add(Part(text = msg.text))
                 formattedContents[formattedContents.lastIndex] = Content(role = role, parts = updatedParts)
@@ -80,6 +83,7 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
             }
         }
         
+        // Add current prompt + file/audio if available
         val promptParts = mutableListOf<Part>()
         if (fileBase64 != null && fileMimeType != null) {
             promptParts.add(Part(inlineData = com.example.data.api.InlineData(mimeType = fileMimeType, data = fileBase64)))
@@ -87,6 +91,7 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
         promptParts.add(Part(text = prompt))
         
         if (formattedContents.isNotEmpty() && formattedContents.last().role == "user") {
+            // Merge into previous user turn if the last turn was also user
             val updatedParts = formattedContents.last().parts.toMutableList()
             updatedParts.addAll(promptParts)
             formattedContents[formattedContents.lastIndex] = Content(role = "user", parts = updatedParts)
@@ -163,6 +168,7 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
             }
         }
 
+        // System instructions detailing the model capabilities
         val customSystemSuffix = when (model) {
             "gemini-3.1-flash-lite-preview" -> "Berikan jawaban dengan sangat cepat, singkat, padat, langsung ke inti penjelasan, tapi tetap sangat jelas dan informatif."
             else -> "Berikan jawaban bantuan serbaguna yang handal, berimbang, ramah, dan membantu secara umum."
@@ -185,6 +191,7 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
             var rawText = candidate?.content?.parts?.firstOrNull()?.text
                 ?: "Maaf, Zann AI tidak dapat memproses atau menemukan jawaban untuk pertanyaan tersebut saat ini."
             
+            // Extract grounding metadata search results if available
             val metadata = candidate?.groundingMetadata
             val chunks = metadata?.groundingChunks
             if (!chunks.isNullOrEmpty()) {
@@ -205,8 +212,8 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
             rawText
         } catch (e: retrofit2.HttpException) {
             val modelName = when (model) {
-                "gemini-3.1-flash-lite-preview" -> "Flash-Lite"
-                "gemini-2.5-flash" -> "Flash"
+                "gemini-3.1-flash-lite-preview" -> "3.1 Zann-Flash"
+                "gemini-2.5-flash" -> "3.5 Zann-Pro"
                 else -> model
             }
 
@@ -226,16 +233,16 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
                     rawText
                 } catch (fallbackEx: Exception) {
                     when (e.code()) {
-                        429 -> "⚠️ Zann AI Error: Batas kuota/limit pemakaian untuk model '$modelName' telah tercapai (Rate Limit).\n\n💡 Solusi: Silakan tunggu 1 hingga 2 menit sebelum mencoba mengirim pesan kembali, atau ganti pilihan model Anda di atas (misalnya ke model Flash-Lite)."
-                        403 -> "⚠️ Zann AI Error: Akses Dilarang (HTTP 403) - API Key tidak valid. Silakan periksa kembali kunci API."
+                        429 -> "⚠️ Zann AI Error: Batas kuota/limit pemakaian untuk model '$modelName' telah tercapai (Rate Limit).\n\n💡 Solusi: Silakan tunggu 1 hingga 2 menit sebelum mencoba mengirim pesan kembali, atau ganti pilihan model Anda di atas (misalnya ke model 3.1 Zann-Flash)."
+                        403 -> "⚠️ Zann AI Error: Akses Dilarang (HTTP 403) - API Key tidak valid. Silakan periksa kembali kunci API Anda di Secrets panel AI Studio."
                         400 -> "⚠️ Zann AI Error: Permintaan Tidak Valid (HTTP 400). Format tidak didukung atau input tidak sah."
                         else -> "Gagal terhubung dengan Zann AI (HTTP ${e.code()}). Terjadi kendala jaringan atau kesalahan sistem."
                     }
                 }
             } else {
                 when (e.code()) {
-                    429 -> "⚠️ Zann AI Error: Batas kuota/limit pemakaian untuk model '$modelName' telah tercapai (Rate Limit).\n\n💡 Solusi: Silakan tunggu 1 hingga 2 menit sebelum mencoba mengirim pesan kembali, atau ganti pilihan model Anda di atas (misalnya ke model Flash-Lite)."
-                    403 -> "⚠️ Zann AI Error: Akses Dilarang (HTTP 403) - API Key tidak valid. Silakan periksa kembali kunci API."
+                    429 -> "⚠️ Zann AI Error: Batas kuota/limit pemakaian untuk model '$modelName' telah tercapai (Rate Limit).\n\n💡 Solusi: Silakan tunggu 1 hingga 2 menit sebelum mencoba mengirim pesan kembali, atau ganti pilihan model Anda di atas (misalnya ke model 3.1 Zann-Flash)."
+                    403 -> "⚠️ Zann AI Error: Akses Dilarang (HTTP 403) - API Key tidak valid. Silakan periksa kembali kunci API Anda di Secrets panel AI Studio."
                     400 -> "⚠️ Zann AI Error: Permintaan Tidak Valid (HTTP 400). Format tidak didukung atau input tidak sah."
                     else -> "Gagal terhubung dengan Zann AI (HTTP ${e.code()}). Terjadi kendala jaringan atau kesalahan sistem."
                 }
@@ -311,6 +318,7 @@ object RealTimeDataFetcher {
                 val country = cityObj.optString("country")
                 val adminArea = cityObj.optString("admin1")
 
+                // 2. Weather forecast lookup
                 val weatherUrl = "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,showers,weather_code,wind_speed_10m&timezone=auto"
                 val weatherRequest = Request.Builder().url(weatherUrl).build()
                 client.newCall(weatherRequest).execute().use { wResponse ->

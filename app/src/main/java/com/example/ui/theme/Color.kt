@@ -52,3 +52,12 @@ val MintDarkBg = Color(0xFF050F14)
 val MintDarkCard = Color(0xFF0A1E29)
 val MintLightBg = Color(0xFFF0F8FF)
 val MintLightCard = Color(0xFFE0F7FA)
+
+// ================= SYSTEM DARK GRAY / SYSTEM SLATE COLORS =================
+val SystemSlatePrimary = Color(0xFF90A4AE)
+val SystemSlateSecondary = Color(0xFFB0BEC5)
+val SystemSlateTertiary = Color(0xFF78909C)
+val SystemSlateDarkBg = Color(0xFF121212)
+val SystemSlateDarkCard = Color(0xFF1E1E1E)
+val SystemSlateLightBg = Color(0xFFF5F5F5)
+val SystemSlateLightCard = Color(0xFFEEEEEE)

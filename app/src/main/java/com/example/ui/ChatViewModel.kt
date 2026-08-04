@@ -72,6 +72,14 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         prefs.edit().putString("app_theme_id", themeId).apply()
     }
 
+    private val _selectedLanguage = MutableStateFlow(prefs.getString("app_language", "id") ?: "id")
+    val selectedLanguage: StateFlow<String> = _selectedLanguage.asStateFlow()
+
+    fun setSelectedLanguage(langCode: String) {
+        _selectedLanguage.value = langCode
+        prefs.edit().putString("app_language", langCode).apply()
+    }
+
     private val _isGoogleSearchEnabled = MutableStateFlow(prefs.getBoolean("is_google_search_enabled", false))
     val isGoogleSearchEnabled: StateFlow<Boolean> = _isGoogleSearchEnabled.asStateFlow()
 

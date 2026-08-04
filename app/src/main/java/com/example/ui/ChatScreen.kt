@@ -52,9 +52,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ZoomIn
+import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -98,6 +104,9 @@ import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.CheckCircle
+import com.example.util.LanguageManager
 import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Palette
@@ -292,8 +301,8 @@ fun ModelSelectorRow(
     modifier: Modifier = Modifier
 ) {
     val models = listOf(
-        ModelOption("Flash-Lite", "gemini-3.1-flash-lite-preview", "⚡ Cepat & Ringkas", MaterialTheme.colorScheme.secondary),
-        ModelOption("Flash", "gemini-2.5-flash", "🤖 Serbaguna", MaterialTheme.colorScheme.primary)
+        ModelOption("3.1 Zann-Flash", "gemini-3.1-flash-lite-preview", "⚡ Cepat & Ringkas", MaterialTheme.colorScheme.secondary),
+        ModelOption("3.5 Zann-Pro", "gemini-2.5-flash", "🤖 Serbaguna", MaterialTheme.colorScheme.primary)
     )
     
     Row(
@@ -390,6 +399,7 @@ fun ChatScreen(
     }
     
     var inputText by remember { mutableStateOf("") }
+    var previewFullScreenBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
     var showHistoryDialog by remember { mutableStateOf(false) }
     var showLiveAiMode by remember { mutableStateOf(false) }
     var showLearningMemoryDialog by remember { mutableStateOf(false) }
@@ -409,6 +419,8 @@ fun ChatScreen(
     var isPlusMenuExpanded by remember { mutableStateOf(false) }
     var isModelMenuExpanded by remember { mutableStateOf(false) }
     var showThemeSelectionDialog by remember { mutableStateOf(false) }
+    var showLanguageSelectionDialog by remember { mutableStateOf(false) }
+    val selectedLanguage by viewModel.selectedLanguage.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     // Audio recording state
@@ -1170,6 +1182,7 @@ fun ChatScreen(
         val activeThemeId by viewModel.appThemeId.collectAsState()
         val themeOptions = listOf(
             Triple("cyber_fusion", "Cyber Fusion", "Cyberpunk, Biru, Cyan, Ungu"),
+            Triple("system_slate", LanguageManager.getString("systemGrayTheme", selectedLanguage), LanguageManager.getString("systemGrayDesc", selectedLanguage)),
             Triple("sunset_horizon", "Sunset Horizon", "Hangat, Jingga Sinar Matahari"),
             Triple("forest_moss", "Forest Moss", "Hijau Daun, Teduh, Hutan"),
             Triple("cosmic_nebula", "Cosmic Nebula", "Lembayung, Misteri Angkasa"),
@@ -1188,7 +1201,7 @@ fun ChatScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Pilih Palet Tema Warna",
+                        text = LanguageManager.getString("selectThemeTitle", selectedLanguage),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -1201,7 +1214,7 @@ fun ChatScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
-                        text = "Silakan pilih skema warna yang menarik untuk Zann AI & Flashcard:",
+                        text = LanguageManager.getString("selectThemeSub", selectedLanguage),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1260,6 +1273,7 @@ fun ChatScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     val (colorPrimary, colorSecondary, colorBg) = when(id) {
+                                        "system_slate" -> Triple(Color(0xFFB0BEC5), Color(0xFF78909C), Color(0xFF121212))
                                         "sunset_horizon" -> Triple(Color(0xFFFF5A36), Color(0xFFFFB300), Color(0xFF140D0B))
                                         "forest_moss" -> Triple(Color(0xFF4CAF50), Color(0xFF81C784), Color(0xFF0C100E))
                                         "cosmic_nebula" -> Triple(Color(0xFF9D4EDD), Color(0xFFE0A1FF), Color(0xFF0A0216))
@@ -1300,10 +1314,130 @@ fun ChatScreen(
                     onClick = { showThemeSelectionDialog = false },
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text("Selesai")
+                    Text(LanguageManager.getString("close", selectedLanguage))
                 }
             },
             shape = RoundedCornerShape(20.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    }
+
+    // --- PILIH BAHASA ZANN AI MODAL DIALOG ---
+    if (showLanguageSelectionDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageSelectionDialog = false },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Translate,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = LanguageManager.getString("selectLanguageTitle", selectedLanguage),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 380.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = LanguageManager.getString("selectLanguageSub", selectedLanguage),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+
+                    LanguageManager.supportedLanguages.forEach { lang ->
+                        val isSelected = lang.code == selectedLanguage
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.setSelectedLanguage(lang.code)
+                                    showLanguageSelectionDialog = false
+                                },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isSelected) {
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                }
+                            ),
+                            border = BorderStroke(
+                                width = if (isSelected) 2.dp else 1.dp,
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                                }
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = lang.flag,
+                                        fontSize = 20.sp
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            text = lang.name,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isSelected) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurface
+                                            }
+                                        )
+                                        Text(
+                                            text = lang.nativeName,
+                                            fontSize = 10.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                }
+
+                                if (isSelected) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = "Selected",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showLanguageSelectionDialog = false },
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text(LanguageManager.getString("close", selectedLanguage))
+                }
+            },
+            shape = RoundedCornerShape(24.dp),
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
     }
@@ -2394,49 +2528,35 @@ fun ChatScreen(
                                 letterSpacing = (-0.5).sp
                             )
                             Text(
-                                text = "Asisten Cerdas Cepat",
+                                text = LanguageManager.getString("appSubtitle", selectedLanguage),
                                 fontSize = 10.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.60f),
                                 fontWeight = FontWeight.Medium
                             )
                         }
 
-                        // Unified Dropdown Menu for Learning Features (Flashcards & Custom Memory)
+                        // Unified 3-Dot Vertical Dropdown Menu for Features & Settings
                         Box {
-                            Card(
-                                shape = RoundedCornerShape(20.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-                                ),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                            IconButton(
+                                onClick = { showCombinedMenu = true },
                                 modifier = Modifier
-                                    .clickable { showCombinedMenu = true }
+                                    .size(36.dp)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f), CircleShape)
+                                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape)
                                     .testTag("unified_learning_menu_button")
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.AutoAwesome,
-                                        contentDescription = "Fitur Belajar",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "Fitur",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = LanguageManager.getString("fitur", selectedLanguage),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
 
                             DropdownMenu(
                                 expanded = showCombinedMenu,
                                 onDismissRequest = { showCombinedMenu = false },
-                                modifier = Modifier.width(200.dp)
+                                modifier = Modifier.width(220.dp)
                             ) {
                                 DropdownMenuItem(
                                     text = {
@@ -2450,13 +2570,13 @@ fun ChatScreen(
                                             Spacer(modifier = Modifier.width(10.dp))
                                             Column {
                                                 Text(
-                                                    text = "Flashcard Zann AI",
+                                                    text = LanguageManager.getString("flashcardTitle", selectedLanguage),
                                                     fontSize = 12.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = MaterialTheme.colorScheme.secondary
                                                 )
                                                 Text(
-                                                    text = "Kuis & Pembuat Otomatis",
+                                                    text = LanguageManager.getString("flashcardSub", selectedLanguage),
                                                     fontSize = 9.sp,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                                 )
@@ -2482,13 +2602,13 @@ fun ChatScreen(
                                             Spacer(modifier = Modifier.width(10.dp))
                                             Column {
                                                 Text(
-                                                    text = "Memori Belajar Zann AI",
+                                                    text = LanguageManager.getString("memoryTitle", selectedLanguage),
                                                     fontSize = 12.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
                                                 Text(
-                                                    text = "Basis Pengetahuan Kustom",
+                                                    text = LanguageManager.getString("memorySub", selectedLanguage),
                                                     fontSize = 9.sp,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                                 )
@@ -2514,13 +2634,13 @@ fun ChatScreen(
                                             Spacer(modifier = Modifier.width(10.dp))
                                             Column {
                                                 Text(
-                                                    text = "Rencana Belajar Zann AI",
+                                                    text = LanguageManager.getString("plannerTitle", selectedLanguage),
                                                     fontSize = 12.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = MaterialTheme.colorScheme.tertiary
                                                 )
                                                 Text(
-                                                    text = "Pecah Topik Sesuai Target",
+                                                    text = LanguageManager.getString("plannerSub", selectedLanguage),
                                                     fontSize = 9.sp,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                                 )
@@ -2530,6 +2650,70 @@ fun ChatScreen(
                                     onClick = {
                                         showCombinedMenu = false
                                         onNavigateToPlanner()
+                                        coroutineScope.launch { drawerState.close() }
+                                    }
+                                )
+
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Default.Palette,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(10.dp))
+                                            Column {
+                                                Text(
+                                                    text = LanguageManager.getString("paletteTitle", selectedLanguage),
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Text(
+                                                    text = LanguageManager.getString("paletteSub", selectedLanguage),
+                                                    fontSize = 9.sp,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                                )
+                                            }
+                                        }
+                                    },
+                                    onClick = {
+                                        showCombinedMenu = false
+                                        showThemeSelectionDialog = true
+                                        coroutineScope.launch { drawerState.close() }
+                                    }
+                                )
+
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Default.Translate,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.secondary,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(10.dp))
+                                            Column {
+                                                Text(
+                                                    text = LanguageManager.getString("languageTitle", selectedLanguage),
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.secondary
+                                                )
+                                                Text(
+                                                    text = LanguageManager.getString("languageSub", selectedLanguage),
+                                                    fontSize = 9.sp,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                                )
+                                            }
+                                        }
+                                    },
+                                    onClick = {
+                                        showCombinedMenu = false
+                                        showLanguageSelectionDialog = true
                                         coroutineScope.launch { drawerState.close() }
                                     }
                                 )
@@ -2566,7 +2750,7 @@ fun ChatScreen(
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
-                                text = "Percakapan Baru",
+                                text = LanguageManager.getString("newChat", selectedLanguage),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -2578,7 +2762,7 @@ fun ChatScreen(
 
                     // Text Section Header
                     Text(
-                        text = "RIWAYAT OBROLAN",
+                        text = LanguageManager.getString("chatHistory", selectedLanguage),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
@@ -2603,7 +2787,7 @@ fun ChatScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Belum Ada Riwayat",
+                                text = LanguageManager.getString("noHistory", selectedLanguage),
                                 fontSize = 11.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                             )
@@ -2746,7 +2930,7 @@ fun ChatScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Hapus Chat",
+                                    text = LanguageManager.getString("deleteChat", selectedLanguage),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (selectedSessions.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
@@ -2767,55 +2951,6 @@ fun ChatScreen(
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
                                 }
-                            }
-                        }
-
-                        // Color theme choice option row
-                        val appThemeId by viewModel.appThemeId.collectAsState()
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { showThemeSelectionDialog = true }
-                                .padding(vertical = 8.dp, horizontal = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.Palette,
-                                    contentDescription = "Palet Warna",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Palet Warna",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            // Small colored indicator badge
-                            Card(
-                                shape = RoundedCornerShape(8.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primary
-                                )
-                            ) {
-                                Text(
-                                    text = when(appThemeId) {
-                                        "sunset_horizon" -> "Sunset"
-                                        "forest_moss" -> "Forest"
-                                        "cosmic_nebula" -> "Cosmic"
-                                        "mint_breeze" -> "Mint"
-                                        else -> "Cyber"
-                                    },
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
                             }
                         }
                     }
@@ -2959,7 +3094,7 @@ fun ChatScreen(
                                     }
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "Online & Real-time",
+                                        text = LanguageManager.getString("onlineRealtime", selectedLanguage),
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
@@ -3032,6 +3167,7 @@ fun ChatScreen(
                 ) {
                     if (messages.isEmpty()) {
                         WelcomeState(
+                            selectedLanguage = selectedLanguage,
                             onSelectPrompt = { prompt ->
                                 viewModel.sendMessage(prompt)
                             }
@@ -3129,6 +3265,14 @@ fun ChatScreen(
                                 }
                             }
 
+                            if (previewFullScreenBitmap != null) {
+                                FullScreenImageViewerDialog(
+                                    imageBitmap = previewFullScreenBitmap,
+                                    title = attachedFileName ?: "Gambar Terlampir",
+                                    onDismiss = { previewFullScreenBitmap = null }
+                                )
+                            }
+
                             Card(
                                 shape = RoundedCornerShape(12.dp),
                                 colors = CardDefaults.cardColors(
@@ -3152,6 +3296,9 @@ fun ChatScreen(
                                                 .size(56.dp)
                                                 .clip(RoundedCornerShape(8.dp))
                                                 .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                                                .clickable {
+                                                    previewFullScreenBitmap = imageBitmap
+                                                }
                                         )
                                         Spacer(modifier = Modifier.width(10.dp))
                                         Column(modifier = Modifier.weight(1f)) {
@@ -3394,7 +3541,7 @@ fun ChatScreen(
                                         text = {
                                             Column {
                                                 Text(
-                                                    text = "Tutor Foto Tugas AI",
+                                                    text = LanguageManager.getString("tutorPhotoTask", selectedLanguage),
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 13.sp
                                                 )
@@ -3426,7 +3573,7 @@ fun ChatScreen(
                                         text = {
                                             Column {
                                                 Text(
-                                                    text = "Tambahkan File",
+                                                    text = LanguageManager.getString("addFile", selectedLanguage),
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 13.sp
                                                 )
@@ -3462,7 +3609,7 @@ fun ChatScreen(
                                                     fontSize = 13.sp
                                                 )
                                                 Text(
-                                                    text = if (isGoogleSearchEnabled) "Menggunakan info web terkini" else "Tanpa pencarian internet tambahan",
+                                                    text = if (isGoogleSearchEnabled) LanguageManager.getString("webGroundingOn", selectedLanguage) else LanguageManager.getString("webGroundingOff", selectedLanguage),
                                                     fontSize = 10.sp,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                                 )
@@ -3486,7 +3633,7 @@ fun ChatScreen(
 
                             // Compact Model Selector Dropdown Pill
                             Box {
-                                val currentModelLabel = if (selectedModel == "gemini-2.5-flash") "Pro" else "Lite"
+                                val currentModelLabel = if (selectedModel == "gemini-2.5-flash") "Pro" else "Flash"
                                 
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -3522,7 +3669,7 @@ fun ChatScreen(
                                         text = {
                                             Column {
                                                 Text(
-                                                    text = "3.1 Flash-Lite",
+                                                    text = "3.1 Zann-Flash",
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 13.sp,
                                                     color = if (selectedModel == "gemini-3.1-flash-lite-preview") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
@@ -3543,7 +3690,7 @@ fun ChatScreen(
                                         text = {
                                             Column {
                                                 Text(
-                                                    text = "3.5 Flash",
+                                                    text = "3.5 Zann-Pro",
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 13.sp,
                                                     color = if (selectedModel == "gemini-2.5-flash") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
@@ -3573,7 +3720,7 @@ fun ChatScreen(
                                     .testTag("message_input_field"),
                                 placeholder = {
                                     Text(
-                                        text = "Tanya Zann AI...",
+                                        text = LanguageManager.getString("typeMessagePlaceholder", selectedLanguage),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                         fontSize = 14.sp
                                     )
@@ -3681,14 +3828,30 @@ fun ChatScreen(
 
 @Composable
 fun WelcomeState(
+    selectedLanguage: String = "id",
     onSelectPrompt: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val suggestedPrompts = remember {
+    val suggestedPrompts = remember(selectedLanguage) {
         listOf(
-            SuggestedPromptItem("Beri ide teknologi masa depan", "💡", Icons.Default.Lightbulb, "Inspirasi & ide kreatif"),
-            SuggestedPromptItem("Review ringkas buku fiksi bagus", "📚", Icons.Default.MenuBook, "Rekomendasi literatur"),
-            SuggestedPromptItem("Tips produktif di pagi hari", "⚡", Icons.Default.TipsAndUpdates, "Pengembangan diri")
+            SuggestedPromptItem(
+                LanguageManager.getString("prompt1Title", selectedLanguage),
+                "💡",
+                Icons.Default.Lightbulb,
+                LanguageManager.getString("prompt1Sub", selectedLanguage)
+            ),
+            SuggestedPromptItem(
+                LanguageManager.getString("prompt2Title", selectedLanguage),
+                "📚",
+                Icons.Default.MenuBook,
+                LanguageManager.getString("prompt2Sub", selectedLanguage)
+            ),
+            SuggestedPromptItem(
+                LanguageManager.getString("prompt3Title", selectedLanguage),
+                "⚡",
+                Icons.Default.TipsAndUpdates,
+                LanguageManager.getString("prompt3Sub", selectedLanguage)
+            )
         )
     }
 
@@ -3781,7 +3944,7 @@ fun WelcomeState(
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "Asisten AI online cerdas yang dibekali aneka model (Flash-Lite / Flash) serta upload file dan perekaman voice note real-time.",
+            text = LanguageManager.getString("welcomeText", selectedLanguage),
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
             textAlign = TextAlign.Center,
@@ -3792,7 +3955,7 @@ fun WelcomeState(
         Spacer(modifier = Modifier.height(28.dp))
 
         Text(
-            text = "PROMPT REKOMENDASI",
+            text = LanguageManager.getString("recommendedPrompts", selectedLanguage),
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f),
@@ -4009,6 +4172,100 @@ fun VoicePlayer(audioPath: String) {
 }
 
 @Composable
+fun FullScreenImageViewerDialog(
+    imageBitmap: ImageBitmap? = null,
+    imageUrlOrPath: String? = null,
+    title: String? = null,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.95f))
+                .clickable { onDismiss() }
+        ) {
+            if (imageBitmap != null) {
+                Image(
+                    bitmap = imageBitmap,
+                    contentDescription = title ?: "Gambar Terlampir",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                )
+            } else if (!imageUrlOrPath.isNullOrBlank()) {
+                SubcomposeAsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageUrlOrPath)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = title ?: "Gambar",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    loading = {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = Color.White)
+                        }
+                    }
+                )
+            }
+
+            // Header bar overlay
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(16.dp)
+                    .align(Alignment.TopCenter),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.8f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = title ?: "Lihat Gambar",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(Color.White.copy(alpha = 0.2f), CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Tutup",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun ChatBubble(
     message: ChatMessage,
     onEditUserMessage: (Long, String) -> Unit,
@@ -4022,6 +4279,20 @@ fun ChatBubble(
     val text = message.text
 
     var showEditDialog by remember { mutableStateOf(false) }
+    var showFullScreenViewer by remember { mutableStateOf(false) }
+    var viewerBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+    var viewerPath by remember { mutableStateOf<String?>(null) }
+    var viewerTitle by remember { mutableStateOf<String?>(null) }
+
+    if (showFullScreenViewer) {
+        FullScreenImageViewerDialog(
+            imageBitmap = viewerBitmap,
+            imageUrlOrPath = viewerPath,
+            title = viewerTitle,
+            onDismiss = { showFullScreenViewer = false }
+        )
+    }
+
     var editedTextState by remember(message.text) {
         val displayPrompt = if (message.text.startsWith("[")) {
             val idx = message.text.indexOf("\n\n")
@@ -4216,20 +4487,54 @@ fun ChatBubble(
                     }
 
                     if (messageBitmap != null) {
-                        Image(
-                            bitmap = messageBitmap,
-                            contentDescription = "Gambar Terlampir",
-                            contentScale = ContentScale.Crop,
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(160.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .border(
-                                    width = 1.dp,
-                                    color = (if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.12f),
-                                    shape = RoundedCornerShape(10.dp)
-                                )
-                        )
+                                .clickable {
+                                    viewerBitmap = messageBitmap
+                                    viewerPath = null
+                                    viewerTitle = imageName ?: "Gambar Terlampir"
+                                    showFullScreenViewer = true
+                                }
+                        ) {
+                            Image(
+                                bitmap = messageBitmap,
+                                contentDescription = "Gambar Terlampir",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(180.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .border(
+                                        width = 1.dp,
+                                        color = (if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.12f),
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(8.dp)
+                                    .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(6.dp))
+                                    .padding(horizontal = 6.dp, vertical = 3.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.ZoomIn,
+                                        contentDescription = "Perbesar",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        text = "Ketuk untuk perbesar",
+                                        fontSize = 9.sp,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
                         Spacer(modifier = Modifier.height(6.dp))
                     }
 
@@ -4238,7 +4543,16 @@ fun ChatBubble(
                         colors = CardDefaults.cardColors(
                             containerColor = if (isUser) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer
                         ),
-                        modifier = Modifier.padding(bottom = 6.dp)
+                        modifier = Modifier
+                            .padding(bottom = 6.dp)
+                            .clickable {
+                                if (messageBitmap != null) {
+                                    viewerBitmap = messageBitmap
+                                    viewerPath = null
+                                    viewerTitle = imageName
+                                    showFullScreenViewer = true
+                                }
+                            }
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -4329,7 +4643,13 @@ fun ChatBubble(
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(300.dp),
+                                .height(300.dp)
+                                .clickable {
+                                    viewerBitmap = null
+                                    viewerPath = generatedImagePath
+                                    viewerTitle = generatedImageCaption ?: "Gambar Hasil Zann AI"
+                                    showFullScreenViewer = true
+                                },
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                             )

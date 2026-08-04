@@ -457,7 +457,7 @@ fun ZannLauncherSplashScreen(
         
         // Subtle version number in footer
         Text(
-            text = "v2.2.0-Alpha AI",
+            text = "v3.2.0-Zann AI",
             fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 1.sp,

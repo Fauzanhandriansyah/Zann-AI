@@ -21,6 +21,7 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
     val allDecks: StateFlow<List<FlashcardDeck>> = repository.allDecks
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    // UI generation inputs
     private val _inputText = MutableStateFlow("")
     val inputText: StateFlow<String> = _inputText.asStateFlow()
 
@@ -30,7 +31,7 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
     private val _cardCountInput = MutableStateFlow(10)
     val cardCountInput: StateFlow<Int> = _cardCountInput.asStateFlow()
 
-    private val _deckTypeInput = MutableStateFlow("biasa") 
+    private val _deckTypeInput = MutableStateFlow("biasa") // "biasa" or "pilihan_ganda"
     val deckTypeInput: StateFlow<String> = _deckTypeInput.asStateFlow()
 
     private val _isGenerating = MutableStateFlow(false)
@@ -39,6 +40,7 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
     private val _generateError = MutableStateFlow<String?>(null)
     val generateError: StateFlow<String?> = _generateError.asStateFlow()
 
+    // Attached Image references for generation
     private val _attachedFileBase64 = MutableStateFlow<String?>(null)
     val attachedFileBase64: StateFlow<String?> = _attachedFileBase64.asStateFlow()
 
@@ -51,6 +53,7 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
     private val _attachedFilePath = MutableStateFlow<String?>(null)
     val attachedFilePath: StateFlow<String?> = _attachedFilePath.asStateFlow()
 
+    // Active deck study states
     private val _activeDeck = MutableStateFlow<FlashcardDeck?>(null)
     val activeDeck: StateFlow<FlashcardDeck?> = _activeDeck.asStateFlow()
 
@@ -63,19 +66,24 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
     private val _isCardFlipped = MutableStateFlow(false)
     val isCardFlipped: StateFlow<Boolean> = _isCardFlipped.asStateFlow()
 
+    // Study session evaluation progress map (id or index to difficulty status: "Paham" or "Perlu Belajar")
     private val _cardStatuses = MutableStateFlow<Map<Long, String>>(emptyMap())
     val cardStatuses: StateFlow<Map<Long, String>> = _cardStatuses.asStateFlow()
 
     private val _isStudySessionFinished = MutableStateFlow(false)
     val isStudySessionFinished: StateFlow<Boolean> = _isStudySessionFinished.asStateFlow()
-    
+
+    // NEW FEATURES INJECTED AS REQUESTED
+    // Feature 1: Persistent Starred flashcard IDs
     private val starredPrefs = application.getSharedPreferences("starred_flashcards", Context.MODE_PRIVATE)
     private val _starredCardIds = MutableStateFlow<Set<Long>>(emptySet())
     val starredCardIds: StateFlow<Set<Long>> = _starredCardIds.asStateFlow()
 
+    // Feature 2: Only study starred cards mode configuration
     private val _onlyStudyStarred = MutableStateFlow(false)
     val onlyStudyStarred: StateFlow<Boolean> = _onlyStudyStarred.asStateFlow()
 
+    // Feature 3: Persistent Study Session History
     data class StudyHistoryItem(
         val deckId: Long,
         val deckTitle: String,
@@ -87,12 +95,13 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
     private val _studyHistory = MutableStateFlow<List<StudyHistoryItem>>(emptyList())
     val studyHistory: StateFlow<List<StudyHistoryItem>> = _studyHistory.asStateFlow()
 
+    // Feature A & E: Study Streaks & Daily Goal Tracker
     private val streakPrefs = application.getSharedPreferences("study_streaks_goals", Context.MODE_PRIVATE)
 
     private val _studyStreak = MutableStateFlow(0)
     val studyStreak: StateFlow<Int> = _studyStreak.asStateFlow()
 
-    private val _dailyGoal = MutableStateFlow(10) 
+    private val _dailyGoal = MutableStateFlow(10) // Customizable goal card review count
     val dailyGoal: StateFlow<Int> = _dailyGoal.asStateFlow()
 
     private val _dailyReviewedCards = MutableStateFlow(0)
@@ -116,6 +125,7 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
             _studyStreak.value = currentStreak
             _dailyReviewedCards.value = streakPrefs.getInt("reviewed_today", 0)
         } else {
+            // Check if streak was broken (last study was more than 1 day ago)
             var activeStreak = currentStreak
             if (lastStudyStr.isNotEmpty()) {
                 try {
@@ -125,7 +135,7 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
                         val diffMs = todayDate.time - lastDate.time
                         val diffDays = diffMs / (1000 * 60 * 60 * 24)
                         if (diffDays > 1L) {
-                            activeStreak = 0 
+                            activeStreak = 0 // broke streak
                             streakPrefs.edit().putInt("study_streak", 0).apply()
                         }
                     } else {
@@ -294,6 +304,7 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
                 val filtered = if (_onlyStudyStarred.value) {
                     val starred = cards.filter { _starredCardIds.value.contains(it.id) }
                     if (starred.isEmpty()) {
+                        // Safe fallback: if user checked only-starred option but didn't star any card, show all
                         cards
                     } else {
                         starred
@@ -323,17 +334,21 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
         val updatedStatuses = _cardStatuses.value + (card.id to status)
         _cardStatuses.value = updatedStatuses
         
+        // Record studious metrics activity for Streak & Daily goals on action
         recordStudyActivity()
-        
+
+        // Persist to database
         viewModelScope.launch {
             repository.updateCard(card.copy(difficulty = status))
         }
+
+        // Proceed to next card
         val currentIndex = _currentCardIndex.value
         val totalCards = _activeCards.value.size
         
         if (currentIndex < totalCards - 1) {
             viewModelScope.launch {
-                kotlinx.coroutines.delay(200) 
+                kotlinx.coroutines.delay(200) // Small delay for elegant feel
                 _currentCardIndex.value = currentIndex + 1
                 _isCardFlipped.value = false
             }
@@ -409,6 +424,7 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
                     cards = cards
                 )
 
+                // Select this deck immediately for study!
                 val newDeck = FlashcardDeck(
                     id = generatedDeckId,
                     title = title,
@@ -417,6 +433,7 @@ class FlashcardViewModel(application: Application) : AndroidViewModel(applicatio
                     deckType = _deckTypeInput.value
                 )
                 
+                // Clear inputs
                 _inputText.value = ""
                 _deckTitleInput.value = ""
                 _deckTypeInput.value = "biasa"

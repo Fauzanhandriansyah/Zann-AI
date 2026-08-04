@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
         ViewModelProvider(this)[FlashcardViewModel::class.java]
     }
 
+    // Capture deep link actions from widget
     private val widgetActionState = mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
