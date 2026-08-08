@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-// 1. Cyber Fusion (Default Cyberpunk)
 private val CyberDarkColorScheme = darkColorScheme(
     primary = CyberBlue,
     secondary = CyberTeal,
@@ -46,7 +45,6 @@ private val CyberLightColorScheme = lightColorScheme(
     onSurfaceVariant = Color(0xFF535661)
 )
 
-// 2. Sunset Horizon (Warm/Fire vibe)
 private val SunsetDarkColorScheme = darkColorScheme(
     primary = SunsetOrange,
     secondary = SunsetAmber,
@@ -81,7 +79,6 @@ private val SunsetLightColorScheme = lightColorScheme(
     onSurfaceVariant = Color(0xFF70524C)
 )
 
-// 3. Forest Moss (Earthy/Nature vibe)
 private val ForestDarkColorScheme = darkColorScheme(
     primary = ForestSage,
     secondary = ForestMint,
@@ -116,7 +113,6 @@ private val ForestLightColorScheme = lightColorScheme(
     onSurfaceVariant = Color(0xFF4C6B56)
 )
 
-// 4. Cosmic Nebula (Space vibe)
 private val CosmicDarkColorScheme = darkColorScheme(
     primary = CosmicLavender,
     secondary = CosmicMagenta,
@@ -151,7 +147,6 @@ private val CosmicLightColorScheme = lightColorScheme(
     onSurfaceVariant = Color(0xFF5E457F)
 )
 
-// 5. Mint Breeze (Arctic/Teal vibe)
 private val MintDarkColorScheme = darkColorScheme(
     primary = MintTeal,
     secondary = MintIce,
@@ -186,7 +181,6 @@ private val MintLightColorScheme = lightColorScheme(
     onSurfaceVariant = Color(0xFF465D69)
 )
 
-// 6. System Slate / Dark Gray (System Dark Gray Minimalist)
 private val SystemSlateDarkColorScheme = darkColorScheme(
     primary = SystemSlateSecondary,
     secondary = SystemSlatePrimary,
