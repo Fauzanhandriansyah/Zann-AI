@@ -68,13 +68,10 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
             return "Zann AI Error: API Key Gemini belum dikonfigurasi di panel Secrets AI Studio. Silakan konfigurasi kunci Anda dengan nama GEMINI_API_KEY."
         }
 
-        // Map database history into Gemini Contents API format (using "user" and "model")
-        // To guarantee alternating roles, consecutive identical roles are merged into a single Content turn.
         val formattedContents = mutableListOf<Content>()
         history.forEach { msg ->
             val role = if (msg.sender == "user") "user" else "model"
             if (formattedContents.isNotEmpty() && formattedContents.last().role == role) {
-                // Merge parts if the role matches the previous turn
                 val updatedParts = formattedContents.last().parts.toMutableList()
                 updatedParts.add(Part(text = msg.text))
                 formattedContents[formattedContents.lastIndex] = Content(role = role, parts = updatedParts)
@@ -83,7 +80,6 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
             }
         }
         
-        // Add current prompt + file/audio if available
         val promptParts = mutableListOf<Part>()
         if (fileBase64 != null && fileMimeType != null) {
             promptParts.add(Part(inlineData = com.example.data.api.InlineData(mimeType = fileMimeType, data = fileBase64)))
@@ -91,7 +87,6 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
         promptParts.add(Part(text = prompt))
         
         if (formattedContents.isNotEmpty() && formattedContents.last().role == "user") {
-            // Merge into previous user turn if the last turn was also user
             val updatedParts = formattedContents.last().parts.toMutableList()
             updatedParts.addAll(promptParts)
             formattedContents[formattedContents.lastIndex] = Content(role = "user", parts = updatedParts)
@@ -168,7 +163,6 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
             }
         }
 
-        // System instructions detailing the model capabilities
         val customSystemSuffix = when (model) {
             "gemini-3.1-flash-lite-preview" -> "Berikan jawaban dengan sangat cepat, singkat, padat, langsung ke inti penjelasan, tapi tetap sangat jelas dan informatif."
             else -> "Berikan jawaban bantuan serbaguna yang handal, berimbang, ramah, dan membantu secara umum."
@@ -191,7 +185,6 @@ class ChatRepository(private val chatMessageDao: ChatMessageDao) {
             var rawText = candidate?.content?.parts?.firstOrNull()?.text
                 ?: "Maaf, Zann AI tidak dapat memproses atau menemukan jawaban untuk pertanyaan tersebut saat ini."
             
-            // Extract grounding metadata search results if available
             val metadata = candidate?.groundingMetadata
             val chunks = metadata?.groundingChunks
             if (!chunks.isNullOrEmpty()) {
@@ -301,7 +294,6 @@ object RealTimeDataFetcher {
     fun fetchWeather(cityName: String): String? {
         try {
             val encodedCity = URLEncoder.encode(cityName, "UTF-8")
-            // 1. Geocode lookup
             val geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=$encodedCity&count=1&language=id&format=json"
             val geoRequest = Request.Builder().url(geoUrl).build()
             client.newCall(geoRequest).execute().use { response ->
@@ -318,7 +310,6 @@ object RealTimeDataFetcher {
                 val country = cityObj.optString("country")
                 val adminArea = cityObj.optString("admin1")
 
-                // 2. Weather forecast lookup
                 val weatherUrl = "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,showers,weather_code,wind_speed_10m&timezone=auto"
                 val weatherRequest = Request.Builder().url(weatherUrl).build()
                 client.newCall(weatherRequest).execute().use { wResponse ->
