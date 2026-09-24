@@ -1,0 +1,6 @@
+{
+  "name": "Zann AI",
+  "description": "Asisten Belajar AI Cerdas dilengkapi dengan obrolan interaktif, pembuat kuis otomatis, basis memori kustom, dan fitur rencana belajar cerdas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
