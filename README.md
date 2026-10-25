@@ -48,7 +48,7 @@ Sesuaikan aplikasi dengan gaya dan kebutuhan Anda.
 
 ---
 
-## 🛠️ Tech Stack (Contoh - Silakan Disesuaikan)
+## 🛠️ Tech Stack
 
 Aplikasi ini dibangun menggunakan teknologi modern untuk memastikan performa yang cepat dan antarmuka yang responsif:
 
