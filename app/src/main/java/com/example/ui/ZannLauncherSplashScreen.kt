@@ -42,7 +42,6 @@ fun ZannLauncherSplashScreen(
 ) {
     var startExitAnimation by remember { mutableStateOf(false) }
     
-    // Animatable states for entry animations
     val logoScale = remember { Animatable(0.4f) }
     val logoAlpha = remember { Animatable(0f) }
     val textOffsetY = remember { Animatable(50f) }
